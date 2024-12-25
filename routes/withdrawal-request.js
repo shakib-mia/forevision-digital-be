@@ -92,4 +92,81 @@ router.post("/", verifyJWT, async (req, res) => {
   res.send(postCursor);
 });
 
+router.get("/", verifyJWT, async (req, res) => {
+  const { email } = jwt.decode(req.headers.token);
+  const {
+    kycCollection,
+    userDetails,
+    withdrawalRequest,
+    notificationsCollections,
+  } = await getCollections();
+  const data = await kycCollection.findOne({ emailId: email });
+
+  // console.log(req.body);
+  delete req.body._id;
+  const userData = await userDetails.findOne({ user_email: email });
+  // console.log(userData);
+  delete userData._id;
+
+  const postCursor = await withdrawalRequest.insertOne({
+    ...req.body,
+    ...userData,
+  });
+
+  // console.log(userData);
+
+  // const name = userData.first_name ?  `${userData.first_name} ${userData.last_name}`
+
+  var message = {
+    from: process.env.emailAddress,
+    to: email,
+    // to: "smdshakibmia2001@gmail.com",
+    subject: "Initiation of Withdrawal Enquiry Process",
+    // text: "Plaintext version of the message",
+    html: `<div>
+      Dear ${userData.first_name} ${userData.last_name}, <br />
+  
+      Hi,<br />
+      We hope this email finds you well.<br />
+      Thank you for submitting your invoice.<br />
+     
+      We have initiated the process to address your withdrawal request.<br />
+  
+      You will receive your payment within few days from the Invoice date. Once the payment is done we will share the payment details with you.<br />
+      
+      Thank you for choosing ForeVision Digital.<br />
+      We appreciate your trust in us and look forward to serving you.<br />
+      <br />
+      Best regards,<br />
+      ForeVision Digital<br />
+      </div>`,
+  };
+
+  transporter.sendMail(message, async (error, info) => {
+    if (error) {
+      console.error(error);
+      res.status(500).send(error);
+    } else {
+      console.log("sent");
+    }
+  });
+
+  // notification
+
+  const timeStamp = Math.floor(new Date().getTime() / 1000);
+
+  const notifications = {
+    email: userData.user_email,
+    message: "Withdrawal Enquiry Process Initiated",
+    date: timeStamp,
+    read: false,
+  };
+
+  const notificationsCursor = await notificationsCollections.insertOne(
+    notifications
+  );
+
+  res.send(postCursor);
+});
+
 module.exports = router;

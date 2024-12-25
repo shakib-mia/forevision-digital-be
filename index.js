@@ -714,7 +714,7 @@ const port = process.env.port;
 
 app.get("/", async (req, res) => {
   const token = jwt.sign(
-    { email: "geekypkj@gmail.com" },
+    { email: "akpatro786@gmail.com" },
     process.env.access_token_secret,
     { expiresIn: "1d" }
   );
@@ -1342,14 +1342,17 @@ async function run() {
     });
 
     app.get("/getUserData", async (req, res) => {
+      const { kycCollection } = await getCollections();
       const { token } = req.headers;
       if (jwt.decode(token) !== null) {
         const { email } = jwt.decode(token);
         // console.log(email);
         const data = await userDetails.findOne({ user_email: email });
         const data2 = await clientsCollection.findOne({ emailId: email });
+        const foundKyc = await kycCollection.findOne({ emailId: email });
+        console.log(foundKyc !== null);
 
-        res.send({ data: { ...data2, ...data } });
+        res.send({ data: { ...data2, ...data, kycFilled: foundKyc !== null } });
       } else {
         res.status(401).send("Unauthorized Access");
       }

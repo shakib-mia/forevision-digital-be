@@ -6,8 +6,7 @@ router.get("/:emailId", async (req, res) => {
   const { emailId } = req.params;
   const { withdrawalRequest } = await getCollections();
 
-  const found = await withdrawalRequest.findOne({ emailId });
-  console.log(found);
+  const found = await withdrawalRequest.findOne({ user_email: emailId });
 
   res.send(found);
 });
