@@ -1273,11 +1273,11 @@ async function run() {
             res.send({ token, details });
           } else {
             // console.log(err);
-            res.status(401).send({ message: "incorrect password" });
+            res.status(401).send({ message: "Incorrect Password" });
           }
         });
       } else {
-        res.status(401).send({ message: "no user found" });
+        res.status(401).send({ message: "No User Found" });
       }
     });
 

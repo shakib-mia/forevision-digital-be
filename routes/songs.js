@@ -7,27 +7,49 @@ const { ObjectId } = require("mongodb");
 
 router.post("/", verifyJWT, async (req, res) => {
   const song = req.body;
-  const { newSongs, clientsCollection } = await getCollections();
+  const { newSongs, clientsCollection } = await getCollections(); // Assumes getCollections() initializes required collections
   delete song._id;
 
-  const user = await clientsCollection.findOne({ emailId: song.userEmail });
-  // console.log(user);
-  const isrcs = user.isrc.split(",");
-  isrcs.push(song.isrc);
+  try {
+    // Check if the client exists
+    const user = await clientsCollection.findOne({ emailId: song.userEmail });
 
-  user.isrc = isrcs.join(",");
-  const newUser = { ...user };
-  delete newUser._id;
+    if (!user) {
+      // If user doesn't exist, create a new entry
+      const userData = {
+        emailId: song.userEmail || song.emailId,
+        isrc: song.isrc, // Add the first ISRC
+      };
 
-  // console.log(req.body);
+      const insertResult = await clientsCollection.insertOne(userData);
+      res.send({
+        message: "New user created",
+        ...insertResult,
+      });
+    } else {
+      // If user exists, update the ISRC field
+      let isrcs = user.isrc ? user.isrc.split(",") : [];
+      if (!isrcs.includes(song.isrc)) {
+        isrcs.push(song.isrc); // Add the new ISRC if not already present
+      }
 
-  const updateCursor = await clientsCollection.updateOne(
-    { _id: user._id },
-    { $set: newUser },
-    { upsert: true }
-  );
+      const updatedUser = { ...user, isrc: isrcs.join(",") };
+      delete updatedUser._id;
 
-  res.send({ updateCursor });
+      const updateCursor = await clientsCollection.updateOne(
+        { _id: user._id },
+        { $set: updatedUser }
+      );
+
+      res.send({
+        message: "User updated",
+        ...updateCursor,
+      });
+    }
+  } catch (error) {
+    console.error("Error handling ISRC logic:", error);
+    res.status(500).send({ error: "Internal server error" });
+  }
 });
 
 router.put("/update-upload-list/:_id", verifyJWT, async (req, res) => {

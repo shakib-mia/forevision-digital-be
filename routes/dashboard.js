@@ -1,41 +1,36 @@
 const express = require("express");
 const router = express.Router();
 const { getCollections } = require("../constants");
-const verifyJWT = require("../verifyJWT");
 
 router.get("/", async (req, res) => {
   const {
     clientsCollection,
     demoClientsCollection,
     revenueCollections,
-    demoClients,
+    paymentHistory,
   } = await getCollections();
 
   try {
-    // Fetch users and clients
-    const users = await clientsCollection.find({}).toArray();
-    const clients = await demoClientsCollection.find({}).toArray();
+    // Fetch counts directly from the database
+    const [usersCount, clientsCount] = await Promise.all([
+      clientsCollection.countDocuments(),
+      demoClientsCollection.countDocuments(),
+    ]);
 
-    // Pipeline for revenue calculation
-    const revenuePipeline = [
-      {
-        $project: {
-          _id: 0,
-          royality: 1,
+    // Revenue calculation pipeline
+    const finalRevenueResult = await revenueCollections
+      .aggregate([
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: { $toDouble: "$royality" } },
+          },
         },
-      },
-    ];
+      ])
+      .toArray();
+    const finalRevenue = finalRevenueResult[0]?.totalRevenue || 0;
 
-    const revenues = (
-      await revenueCollections.aggregate(revenuePipeline).toArray()
-    ).map((item) => item.royality);
-
-    // Calculate final revenue
-    const finalRevenue = revenues.reduce((sum, value) => {
-      return sum + (value ? parseFloat(value) : 0);
-    }, 0);
-
-    // Aggregation pipeline to count ISRCs
+    // ISRC count pipeline
     const isrcCountResult = await clientsCollection
       .aggregate([
         {
@@ -45,76 +40,45 @@ router.get("/", async (req, res) => {
         },
         {
           $project: {
-            isrcs: { $split: ["$isrc", ","] },
+            isrcCount: { $size: { $split: ["$isrc", ","] } },
           },
-        },
-        {
-          $unwind: "$isrcs", // Unwind the ISRC arrays into individual values
         },
         {
           $group: {
             _id: null,
-            count: { $sum: 1 }, // Count total ISRCs
+            totalCount: { $sum: "$isrcCount" },
           },
         },
       ])
       .toArray();
+    const isrcCount = isrcCountResult[0]?.totalCount || 0;
 
-    const isrcCount = isrcCountResult[0]?.count || 0;
-
-    // Revenue aggregation for demo clients
-    const demoRevenue = await demoClients
+    // Total payment calculation
+    const totalPaidResult = await paymentHistory
       .aggregate([
         {
           $match: {
-            amount: { $exists: true },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            lifeTimeRevenue: {
-              $cond: {
-                if: {
-                  $or: [
-                    { $eq: ["$final revenue", NaN] },
-                    { $lt: ["$final revenue", 0] },
-                  ],
-                },
-                then: 0,
-                else: "$final revenue",
-              },
-            },
-            amount: 1,
+            disbursed: true, // Exclude documents where disbursed is false
           },
         },
         {
           $group: {
             _id: null,
-            totalLifeTimeRevenue: { $sum: "$lifeTimeRevenue" },
-            totalPaid: { $sum: "$amount" },
+            totalPaid: { $sum: { $toDouble: "$totalAmount" } },
           },
         },
       ])
       .toArray();
 
-    const totalPaid = demoRevenue[0]?.totalPaid || 0;
+    const totalPaid = totalPaidResult[0]?.totalPaid || 0;
 
-    // Find the top contributor based on the number of ISRCs
-    const topContributor = users.reduce(
-      (max, obj) =>
-        obj.isrc?.split(",").length > max.isrc?.split(",").length ? obj : max,
-      users[0]
-    );
-
-    // Send the response
+    // Send the optimized response
     res.send({
-      usersCount: users.length,
-      clientsCount: clients.length,
+      usersCount,
+      clientsCount,
       isrcCount,
       finalRevenue,
       totalPaid,
-      topContributor,
     });
   } catch (error) {
     console.error("Error:", error);

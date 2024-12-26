@@ -9,16 +9,19 @@ router.post("/", async (req, res) => {
     clientsCollection,
     notificationsCollections,
     recentUploadsCollection,
+    userDetails,
   } = await getCollections();
   // console.log(req.body);
   //   const { recipientEmail, artistName, status, songName, additionalInfo } =
   //     req.body;
-  const { userEmail, songName, status, reason } = req.body;
-  const { first_name, last_name } = await clientsCollection.findOne({
-    emailId: userEmail,
+  const { emailId, songName, status, reason } = req.body;
+  console.log(req.body);
+  const user = await clientsCollection.findOne({
+    emailId: emailId,
   });
+  const user2 = await userDetails.findOne({ user_email: emailId });
 
-  console.log(process.env.emailAddress, process.env.emailPass);
+  const { first_name, last_name } = { ...user, ...user2 };
 
   //   Create a transport instance with your email configuration
   const transporter = nodemailer.createTransport({
@@ -62,7 +65,7 @@ router.post("/", async (req, res) => {
   }
 
   let notification = {
-    email: req.body.userEmail,
+    email: req.body.emailId,
     message: notificationContent,
     date: timeStamp,
   };
@@ -145,7 +148,7 @@ router.post("/", async (req, res) => {
   //   Set up email data
   let mailOptions = {
     from: process.env.emailAddress,
-    to: userEmail,
+    to: emailId,
     // to: "smdshakibmia2001@gmail.com",
     subject: `Update on Your Music Distribution Status with ForeVision Digital`,
     html: emailContent,
@@ -202,9 +205,9 @@ router.post("/", async (req, res) => {
       }
     );
 
-    const { isrc, userEmail } = req.body;
+    const { isrc, emailId } = req.body;
 
-    const client = await clientsCollection.findOne({ emailId: userEmail });
+    const client = await clientsCollection.findOne({ emailId: emailId });
     console.log(client);
 
     console.log(updateCursor);
@@ -246,6 +249,23 @@ router.post("/", async (req, res) => {
   }
 
   if (status === "Taken Down") {
+    console.log(req.body);
+    const updateCursor = await recentUploadsCollection.updateOne(
+      {
+        _id: new ObjectId(req.body._id),
+      },
+      {
+        $set: { ...newBody, status },
+      },
+      {
+        upsert: false,
+      }
+    );
+
+    res.send(updateCursor);
+  }
+
+  if (status === "Rejected") {
     console.log(req.body);
     const updateCursor = await recentUploadsCollection.updateOne(
       {

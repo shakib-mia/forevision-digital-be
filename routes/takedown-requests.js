@@ -49,8 +49,6 @@ router.put("/:id", async (req, res) => {
 
   updatedData.platformsToDelete = request.platformsToDelete;
 
-  console.log(updatedData);
-
   const updateCursor = await recentUploadsCollection.updateOne(
     { _id: new ObjectId(foundSong._id) },
     { $set: { ...updatedData } },

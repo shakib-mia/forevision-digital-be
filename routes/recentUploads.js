@@ -9,15 +9,20 @@ router.get("/", verifyJWT, async (req, res) => {
   const { recentUploadsCollection } = await getCollections();
   const { email } = jwt.decode(req.headers.token);
 
-  // Fetch documents where the "songs" key exists and matches the user's email
-  const singleSongs = await recentUploadsCollection
-    .find({ userEmail: email }) // Filter only documents with the "songs" key
-    .sort({ status: { $eq: "streaming" } ? -1 : 1 }) // Sort by "streaming" status
-    .toArray();
+  try {
+    // Fetch documents where "songs" match either emailId or userEmail
+    const singleSongs = await recentUploadsCollection
+      .find({
+        $or: [{ emailId: email }, { userEmail: email }],
+      })
+      // .sort({ status: { $eq: "streaming" } ? -1 : 1 }) // Sort by "streaming" status
+      .toArray();
 
-  console.log(singleSongs);
-
-  res.send(singleSongs);
+    res.send(singleSongs);
+  } catch (error) {
+    console.error("Error fetching songs:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 router.get("/album", verifyJWT, async (req, res) => {

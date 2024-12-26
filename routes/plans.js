@@ -94,4 +94,50 @@ router.get("/monthly-sales", async (req, res) => {
   res.send(monthlySalesByPlan);
 });
 
+router.get("/monthly-sales-by-count", async (req, res) => {
+  const { plansCollection } = await getCollections();
+  const plans = await plansCollection.find({}).toArray();
+
+  function getMonthlySalesCountForAllPlans(plans) {
+    const salesByMonth = {};
+
+    plans.forEach((plan) => {
+      plan["monthly-sales"].forEach((sale) => {
+        const saleDate = new Date(sale.date);
+        const year = saleDate.getFullYear();
+        const month = saleDate.getMonth() + 1; // JavaScript months are 0-based, so add 1.
+        const monthKey = `${year}-${month.toString().padStart(2, "0")}`; // Ensure month is two digits.
+
+        if (!salesByMonth[monthKey]) {
+          salesByMonth[monthKey] = {
+            month: monthKey,
+            ForevisionSocial: 0,
+            ForevisionCRBTPlus: 0,
+            ForevisionPro: 0,
+            ForevisionCRBT: 0,
+          };
+        }
+
+        // Count the number of sales for each plan
+        if (plan.planName === "ForeVision-social") {
+          salesByMonth[monthKey].ForevisionSocial += 1;
+        } else if (plan.planName === "CRBT+") {
+          salesByMonth[monthKey].ForevisionCRBTPlus += 1;
+        } else if (plan.planName === "ForeVision Pro") {
+          salesByMonth[monthKey].ForevisionPro += 1;
+        } else if (plan.planName === "CRBT") {
+          salesByMonth[monthKey].ForevisionCRBT += 1;
+        }
+      });
+    });
+
+    // Convert salesByMonth object to an array
+    return Object.values(salesByMonth);
+  }
+
+  const monthlySalesByPlan = getMonthlySalesCountForAllPlans(plans);
+
+  res.send(monthlySalesByPlan);
+});
+
 module.exports = router;
