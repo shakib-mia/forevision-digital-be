@@ -21,14 +21,22 @@ const generateEmployeeCode = async () => {
   );
   let newCodeNumber = 1;
 
-  if (latestEmployee && latestEmployee.employeeCode) {
-    const currentCodeNumber = parseInt(
-      latestEmployee.employeeCode.replace("FVD", "")
-    );
-    newCodeNumber = currentCodeNumber + 1;
+  if (latestEmployee && typeof latestEmployee.employeeCode === "string") {
+    // Extract the numeric part of the code (after 'FVDE')
+    const numericPart = latestEmployee.employeeCode.replace("FVDE", "");
+    const currentCodeNumber = parseInt(numericPart, 10);
+
+    // Check if the extracted number is valid
+    if (!isNaN(currentCodeNumber)) {
+      newCodeNumber = currentCodeNumber + 1;
+    }
   }
 
-  return `FVD${newCodeNumber.toString().padStart(3, "0")}`;
+  // Generate the new employee code with the correct format
+  const newEmployeeCode = `FVDE${newCodeNumber.toString().padStart(5, "0")}`;
+  console.log(newEmployeeCode);
+
+  return newEmployeeCode;
 };
 
 router.get("/", async (req, res) => {
@@ -47,6 +55,8 @@ router.post("/create-employee", async (req, res) => {
   try {
     // Generate employee code
     const employeeCode = await generateEmployeeCode();
+
+    // console.log(employeeCode);
 
     // Generate password
     const password = generatePassword();
@@ -85,6 +95,17 @@ router.get("/check-role", verifyJWT, async (req, res) => {
   res.send({ role: role || jwt.decode(token).email.split("@")[0] });
 
   // console.log();
+});
+
+router.delete("/:_id", async (req, res) => {
+  const { _id } = req.params;
+  const { employeesCollection } = await getCollections();
+
+  const deleteCursor = await employeesCollection.deleteOne({
+    _id: new ObjectId(_id),
+  });
+
+  res.send(deleteCursor);
 });
 
 module.exports = router;

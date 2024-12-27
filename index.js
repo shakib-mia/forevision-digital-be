@@ -87,6 +87,7 @@ const plans = require("./routes/plans");
 const crbtCodes = require("./routes/crbt-codes");
 const royaltySplits = require("./routes/split-royalties");
 const customCutAPI = require("./routes/custom-cut");
+const uploadDate = require("./routes/upload-date");
 
 const paidData = [
   {
@@ -1074,6 +1075,10 @@ async function run() {
         path: "/custom-cut",
         element: customCutAPI,
       },
+      {
+        path: "/upload-date",
+        element: uploadDate,
+      },
       // {
       //   path: "/upload-promotional-artwork",
       //   element: uploadPromotionalArtwork,
@@ -1342,7 +1347,7 @@ async function run() {
     });
 
     app.get("/getUserData", async (req, res) => {
-      const { kycCollection } = await getCollections();
+      const { kycCollection, revenueCollections } = await getCollections();
       const { token } = req.headers;
       if (jwt.decode(token) !== null) {
         const { email } = jwt.decode(token);
@@ -1350,7 +1355,14 @@ async function run() {
         const data = await userDetails.findOne({ user_email: email });
         const data2 = await clientsCollection.findOne({ emailId: email });
         const foundKyc = await kycCollection.findOne({ emailId: email });
-        console.log(foundKyc !== null);
+
+        const result = await revenueCollections
+          .find({}, { projection: { uploadDate: 1 } }) // Only include the `date` field
+          .sort({ date: -1 }) // Sort by date in descending order
+          .limit(1) // Fetch only the first document
+          .toArray();
+
+        console.log(result[0]);
 
         res.send({ data: { ...data2, ...data, kycFilled: foundKyc !== null } });
       } else {
