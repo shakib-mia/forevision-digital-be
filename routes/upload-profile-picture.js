@@ -15,8 +15,9 @@ const storage = multer.diskStorage({
   },
 
   filename: function (req, file, cb) {
-    const { authorization } = req.headers;
-    const { email } = jwt.decode(authorization);
+    const { token } = req.headers;
+    console.log(req.headers);
+    const { email } = jwt.decode(token);
 
     cb(
       null,

@@ -88,6 +88,7 @@ const crbtCodes = require("./routes/crbt-codes");
 const royaltySplits = require("./routes/split-royalties");
 const customCutAPI = require("./routes/custom-cut");
 const uploadDate = require("./routes/upload-date");
+const getSongNames = require("./routes/get-song-names");
 
 const paidData = [
   {
@@ -1079,10 +1080,10 @@ async function run() {
         path: "/upload-date",
         element: uploadDate,
       },
-      // {
-      //   path: "/upload-promotional-artwork",
-      //   element: uploadPromotionalArtwork,
-      // },
+      {
+        path: "/get-song-names",
+        element: getSongNames,
+      },
     ];
 
     apis.map(({ path, element }) => app.use(path, element));
