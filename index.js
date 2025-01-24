@@ -89,6 +89,8 @@ const royaltySplits = require("./routes/split-royalties");
 const customCutAPI = require("./routes/custom-cut");
 const uploadDate = require("./routes/upload-date");
 const getSongNames = require("./routes/get-song-names");
+const checkAudioFile = require("./routes/check-audio-file");
+const testReports = require("./routes/test-reports");
 
 const paidData = [
   {
@@ -1083,6 +1085,14 @@ async function run() {
       {
         path: "/get-song-names",
         element: getSongNames,
+      },
+      {
+        path: "/check-audio-file",
+        element: checkAudioFile,
+      },
+      {
+        path: "/test-reports",
+        element: testReports,
       },
     ];
 

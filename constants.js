@@ -174,6 +174,10 @@ const getCollections = async () => {
     .db("forevision-digital")
     .collection("upload-date");
 
+  const testReports = await client2
+    .db("forevision-digital")
+    .collection("test-reports");
+
   function customLog(...messages) {
     const err = new Error();
     const stackLine = err.stack.split("\n")[2]; // Adjust this line number based on where the error stack points to the correct caller
@@ -228,6 +232,7 @@ const getCollections = async () => {
     crbtCodes,
     splitRoyalties,
     uploadDate,
+    testReports,
   };
 };
 

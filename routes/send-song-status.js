@@ -149,6 +149,7 @@ router.post("/", async (req, res) => {
   let mailOptions = {
     from: process.env.emailAddress,
     to: emailId,
+    cc: "connect@forevisiondigital.com",
     // to: "smdshakibmia2001@gmail.com",
     subject: `Update on Your Music Distribution Status with ForeVision Digital`,
     html: emailContent,

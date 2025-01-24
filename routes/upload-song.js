@@ -92,10 +92,19 @@ router.get("/:email", verifyJWT, async (req, res) => {
 });
 
 router.get("/by-id/:_id", async (req, res) => {
-  const { recentUploadsCollection } = await getCollections();
+  const { recentUploadsCollection, testReports } = await getCollections();
   const songsData = await recentUploadsCollection.findOne({
     _id: new ObjectId(req.params._id),
   });
+
+  const isChecked = await testReports.findOne({ orderId: songsData.orderId });
+
+  // console.log(isChecked);
+  if (isChecked) {
+    if (isChecked._id) {
+      songsData.checked = true;
+    }
+  }
 
   res.send(songsData);
 });

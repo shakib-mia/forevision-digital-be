@@ -67,8 +67,6 @@ router.get("/admin/album/live", verifyJWT, async (req, res) => {
       },
     })
     .toArray();
-  console.log("finding live...");
-  console.log(album);
   res.send(album);
 });
 
