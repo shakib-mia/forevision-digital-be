@@ -135,7 +135,8 @@ router.post("/delete/:_id", async (req, res) => {
 
   var message = {
     from: process.env.emailAddress,
-    to: "smdshakibmia2001@gmail.com",
+    to: req.body.emailId,
+    // to: "smdshakibmia2001@gmail.com",
     subject: "Yearly Plan Request Declined",
     // text: "Plaintext version of the message",
     html: `<div>
