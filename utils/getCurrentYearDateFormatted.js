@@ -1,4 +1,4 @@
-export default function getCurrentYearDateFormatted(d = new Date()) {
+function getCurrentYearDateFormatted(d = new Date()) {
   const today = new Date(); // Get today's date
   const date = new Date(d);
 
@@ -13,3 +13,5 @@ export default function getCurrentYearDateFormatted(d = new Date()) {
 
   return `${year}/${month}/${day}`;
 }
+
+module.exports = getCurrentYearDateFormatted;
