@@ -1,5 +1,4 @@
-export default function getNextYearDate(date = new Date()) {
-  console.log(date);
+function getNextYearDate(date = new Date()) {
   const nextYearDate = new Date(date);
   nextYearDate.setFullYear(nextYearDate.getFullYear() + 1);
   nextYearDate.setDate(nextYearDate.getDate() - 1); // Subtract 1 day to complete the full cycle
@@ -10,3 +9,5 @@ export default function getNextYearDate(date = new Date()) {
 
   return `${year}/${month}/${day}`;
 }
+
+module.exports = getNextYearDate;
