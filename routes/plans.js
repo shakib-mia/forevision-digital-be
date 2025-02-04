@@ -17,7 +17,9 @@ router.get("/monthly-sales/:price", verifyJWT, async (req, res) => {
     const { plansCollection } = await getCollections();
 
     // Find the plan by price (convert to paisa)
-    const plan = await plansCollection.findOne({ price: parseFloat(price) });
+    const plan = await plansCollection.findOne({
+      price: parseFloat(price),
+    });
 
     if (!plan) {
       return res.status(404).send({ message: "Plan not found" });
@@ -69,6 +71,7 @@ router.get("/monthly-sales", async (req, res) => {
             ForevisionCRBTPlus: 0,
             ForevisionPro: 0,
             ForevisionCRBT: 0,
+            "ForeVision Digital Yearly Plan": 0,
           };
         }
 
@@ -81,6 +84,9 @@ router.get("/monthly-sales", async (req, res) => {
           salesByMonth[monthKey].ForevisionPro += sale.price;
         } else if (plan.planName === "CRBT") {
           salesByMonth[monthKey].ForevisionCRBT += sale.price;
+        } else if (plan.planName === "Yearly") {
+          salesByMonth[monthKey]["ForeVision Digital Yearly Plan"] +=
+            sale.price;
         }
       });
     });
@@ -115,6 +121,7 @@ router.get("/monthly-sales-by-count", async (req, res) => {
             ForevisionCRBTPlus: 0,
             ForevisionPro: 0,
             ForevisionCRBT: 0,
+            "ForeVision Digital Yearly Plan": 0,
           };
         }
 
@@ -127,6 +134,8 @@ router.get("/monthly-sales-by-count", async (req, res) => {
           salesByMonth[monthKey].ForevisionPro += 1;
         } else if (plan.planName === "CRBT") {
           salesByMonth[monthKey].ForevisionCRBT += 1;
+        } else if (plan.planName === "Yearly") {
+          salesByMonth[monthKey]["ForeVision Digital Yearly Plan"] += 1;
         }
       });
     });

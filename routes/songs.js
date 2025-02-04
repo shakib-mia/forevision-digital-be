@@ -3,6 +3,7 @@ const verifyJWT = require("../verifyJWT");
 const { getCollections, client } = require("../constants");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const { ObjectId } = require("mongodb");
 
 router.post("/", verifyJWT, async (req, res) => {
@@ -84,21 +85,26 @@ router.get("/by-user-id/:user_id", async (req, res) => {
     const isrcs = user.isrc.split(",");
 
     // Fetch songs, newSongs, and splitRoyalties in parallel
-    const [songsArray, newSongsArray, splitRoyaltiesISRCs] = await Promise.all([
+    const [songsArray, newSongsArray, splitRoyaltiesArray] = await Promise.all([
       songs.find({ ISRC: { $in: isrcs } }).toArray(),
       newSongs.find({ ISRC: { $in: isrcs } }).toArray(),
-      splitRoyalties
-        .find({ isrc: { $in: isrcs } }, { projection: { isrc: 1 } })
-        .toArray(),
+      splitRoyalties.find({ isrc: { $in: isrcs } }).toArray(),
     ]);
 
-    // Create a Set for fast lookup of splitRoyalties ISRCs
-    const splitRoyaltiesSet = new Set(splitRoyaltiesISRCs.map((sr) => sr.isrc));
+    // Create a Map for splitRoyalties by ISRC for fast lookup
+    const splitRoyaltiesMap = new Map();
+    splitRoyaltiesArray.forEach((royalty) => {
+      splitRoyaltiesMap.set(royalty.isrc, {
+        confirmed: royalty.confirmed || false,
+        denied: royalty.denied || false,
+      });
+    });
 
     // Combine songs and newSongs, adding the `splitAvailable` field
     const allSongs = [...songsArray, ...newSongsArray].map((song) => ({
       ...song,
-      splitAvailable: splitRoyaltiesSet.has(song.ISRC),
+      splitAvailable: splitRoyaltiesMap.has(song.ISRC),
+      splitDetails: splitRoyaltiesMap.get(song.ISRC) || null, // Attach details if available
     }));
 
     res.send(allSongs);
@@ -188,15 +194,101 @@ router.get("/by-order-id/:orderId", async (req, res) => {
 router.put("/by-order-id/:orderId", async (req, res) => {
   const { orderId } = req.params;
   // const { recentUploadsCollection } = await getCollections();
-  const { recentUploadsCollection } = await getCollections();
-
+  const { recentUploadsCollection, userDetails, notificationsCollections } =
+    await getCollections();
+  const client = await userDetails.findOne({ user_email: req.body.emailId });
   const data = await recentUploadsCollection.findOne({ orderId });
   const updated = req.body;
   updated.status = "paid";
 
   delete updated._id;
 
-  // console.log({ data, req: req.body, updated });
+  const timeStamp = Math.floor(new Date().getTime() / 1000);
+
+  const notification = {
+    email: req.body.emailId,
+    message: `Congratulations! You Uploaded a Song Successfully!`,
+    date: timeStamp,
+  };
+  const notificationCursor = await notificationsCollections.insertOne(
+    notification
+  );
+
+  const date = new Date();
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  const formattedDate = date.toLocaleDateString("en-US", options);
+
+  const unitPrice = parseFloat(updated.price) / 100;
+  const subTotal = unitPrice / (1 + 18 / 100);
+  const gstAmount = unitPrice - subTotal;
+
+  console.log(unitPrice);
+  let mailOptions = {
+    from: `ForeVision Digital ${process.env.emailAddress}`,
+    // to: updated.emailId,
+    to: "smdshakibmia2001@gmail.com",
+    cc: "connect@forevisiondigital.com",
+    subject: `Update on Your Music Distribution Status with ForeVision Digital`,
+    html: ` Dear Artist, <br />
+    A new order has been placed on ForeVision Digital. Below are the order
+    details:
+    <br /><br />
+    ORDER #${orderId} (${formattedDate}) <br />
+    <br /><br />
+    Product: <br />
+    •
+    <span style="text-transform: capitalize"
+      >${updated.planName.split("-").join(" ")}</span
+    >
+    <br />
+
+    Quantity: 1 <br />
+
+    Price: ₹${unitPrice > 0 ? unitPrice.toFixed(2) : "0"}  
+    ${
+      unitPrice > 0
+        ? `Includes ₹${(unitPrice - subTotal).toFixed(2)} (18% GST)`
+        : ""
+    }
+    <br />
+    ${unitPrice > 0 ? `Payment Method: Razorpay <br />` : ""} 
+    <br />
+    Billing Address: <br />
+    ${client.billing_city ? `${client.billing_city}, <br />` : ``}
+    ${client.billing_state ? `${client.billing_state}, <br />` : ``}
+    ${client.billing_country ? `${client.billing_country}, <br />` : ``}
+    ${client.phone_no ? `Contact: ${client.phone_no}, <br />` : ``}
+
+    Email: ${req.body.userEmail} <br />
+    <br />
+    To track your order, please check the My Releases section on your ForeVision
+    Digital dashboard. <br />
+    <br />
+    Congratulations on the new order! <br />
+    <br />
+    Best regards, <br />
+    ForeVision Digital Team`,
+  };
+
+  const transporter = nodemailer.createTransport({
+    host: "smtp.hostinger.com", // Replace with your Hostinger SMTP server
+    port: 587, // Typically, SMTP uses port 587
+    secure: false, // Set to true if you are using SSL/TLS
+    auth: {
+      user: process.env.emailAddress,
+      pass: process.env.emailPass,
+    },
+  });
+
+  console.log("sending mail...");
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending email:", error);
+      return res.status(500).send("Failed to send email.");
+    }
+    // res.status(200).send("Email sent successfully!");
+  });
 
   const updateCursor = await recentUploadsCollection.updateOne(
     { _id: data._id },

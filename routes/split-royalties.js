@@ -21,17 +21,44 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:_id", async (req, res) => {
-  const { splitRoyalties, clientsCollection } = await getCollections();
+  const {
+    splitRoyalties,
+    notificationsCollections,
+    clientsCollection,
+    userDetails,
+  } = await getCollections();
   delete req.body._id;
 
   const { splits, isrc, songName, owner } = req.body;
+  // console.log(req.body);
 
   try {
     // Find the artist name (owner email)
-    const ownerDetails = await clientsCollection.findOne({ emailId: owner });
+    const clientData = await clientsCollection.findOne({ emailId: owner });
+    const userData = await userDetails.findOne({ user_email: owner });
+
+    const ownerDetails = { ...clientData, ...userData };
+
     const artistName = ownerDetails
       ? ownerDetails.first_name + " " + ownerDetails.last_name
       : "an artist";
+
+    // console.log(ownerDetails);
+
+    if (req.body.denied) {
+      const timeStamp = Math.floor(new Date().getTime() / 1000);
+
+      const notification = {
+        email: req.body.owner,
+        message: `Your Split Request has been denied`,
+        date: timeStamp,
+      };
+
+      const notificationRequest = await notificationsCollections.insertOne(
+        notification
+      );
+      console.log(notificationRequest);
+    }
 
     for (const split of splits) {
       const { emailId } = split;
@@ -48,18 +75,20 @@ router.put("/:_id", async (req, res) => {
           isrc,
         });
 
-        // Send email only to the unavailable user
-        const message = `
-        <p>Hello dear artist,</p>
-        <p>You've made some awesome music, and now it's time to get paid for what you love to do.</p>
-        <p>You collaborated in a song called - <strong>${songName}</strong>.</p>
-        <p>We have got a request from - <strong>${artistName}</strong> to add you in the loop, to distribute the royalty with transparency.</p>
-        <p>To claim your share of deal, kindly visit <a href="https://forevisiondigital.in/">forevisiondigital.in</a>.</p>
-        <p>In case you're not signed up, put your Gmail and other details as asked, or just log in to your dashboard.</p>
-        <p>We will add you to our system and notify you about the disbursement accordingly.</p>
-        `;
+        if (req.body.confirmed) {
+          // Send email only to the unavailable user
+          const message = `
+            <p>Hello Dear Artist,</p>
+            <p>You've made some awesome music, and now it's time to get paid for what you love to do.</p>
+            <p>You collaborated in a song called - <strong>${songName}</strong>.</p>
+            <p>We have got a request from - <strong>${artistName}</strong> to add you in the loop, to distribute the royalty with transparency.</p>
+            <p>To claim your share of deal, kindly visit <a href="https://dashboard.forevisiondigital.com/">dashboard.forevisiondigital.com</a>.</p>
+            <p>In case you're not signed up, put your Gmail and other details as asked, or just log in to your dashboard.</p>
+            <p>We will add you to our system and notify you about the disbursement accordingly.</p>
+          `;
 
-        await sendEmail(emailId, "Royalty Distribution Request", message);
+          await sendEmail(emailId, "Royalty Distribution Request", message);
+        }
       } else {
         // If user already exists, update their ISRC
         if (hasClient.isrc) {
@@ -114,8 +143,9 @@ const sendEmail = async (to, subject, htmlContent) => {
     });
 
     const mailOptions = {
-      from: process.env.emailAddress,
+      from: `ForeVision Digital ${process.env.emailAddress}`,
       to,
+      cc: "connect@forevisiondigital.com",
       subject,
       html: htmlContent,
     };

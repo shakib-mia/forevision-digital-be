@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div style="max-width: 500px; margin: 0 auto">
+      <p>
+        Dear ${client.first_name} ${client.last_name},<br />
+        <br />
+        Thank you for upgrading to our Yearly Plan! Your subscription has been
+        successfully activated, and you’re now set for a full year of seamless
+        music distribution.
+      </p>
+
+      <h4 style="margin-bottom: 0">Purchase Details</h4>
+      <ul>
+        <li>Plan: ForeVision Yearly Plan</li>
+        <li>Amount Paid: ${price/100} [₹XXX / $XXX]</li>
+        <li>Transaction ID: ${razorpay_payment_id}</li>
+        <li>Purchase Date: ${yearlyPlanStartDate}</li>
+        <li>Expiry Date: ${yearlyPlanEndDate}</li>
+      </ul>
+
+      <h4>What’s Next?</h4>
+
+      <ul style="list-style-type: none; padding-left: 0">
+        <li>
+          ✅ Full Access – Distribute your music to all major platforms without
+          interruptions.
+        </li>
+        <li>
+          ✅ Priority Support – Get faster responses from our support team.
+        </li>
+        <li>✅ Royalty Dashboard – Track your earnings with ease.</li>
+        <li>
+          ✅ Advanced Analytics – Monitor your music’s performance in real-time.
+        </li>
+      </ul>
+
+      <p>
+        Your journey with ForeVision Digital just got even better! If you have
+        any questions or need assistance, feel free to reach out.
+      </p>
+      <h4>Need Help?</h4>
+      <p>
+        Contact our support team at [Support Email] or visit
+        <a href="https://forevisiondigital.com/"
+          >https://forevisiondigital.com/</a
+        >.
+      </p>
+      <p>Happy Distributing!</p>
+
+      <p>
+        Best regards, <br />
+        ForeVision Digital <br />
+        <a href="https://forevisiondigital.com/"
+          >https://forevisiondigital.com/</a
+        >
+        | [Support Email] <br />
+      </p>
+    </div>
+  </body>
+</html>

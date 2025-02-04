@@ -41,8 +41,9 @@ router.post("/", verifyJWT, async (req, res) => {
   // const name = userData.first_name ?  `${userData.first_name} ${userData.last_name}`
 
   var message = {
-    from: process.env.emailAddress,
+    from: `ForeVision Digital ${process.env.emailAddress}`,
     to: email,
+    cc: "connect@forevisiondigital.com",
     // to: "smdshakibmia2001@gmail.com",
     subject: "Initiation of Withdrawal Enquiry Process",
     // text: "Plaintext version of the message",
@@ -118,8 +119,9 @@ router.get("/", verifyJWT, async (req, res) => {
   // const name = userData.first_name ?  `${userData.first_name} ${userData.last_name}`
 
   var message = {
-    from: process.env.emailAddress,
+    from: `ForeVision Digital ${process.env.emailAddress}`,
     to: email,
+    cc: "connect@forevisiondigital.com",
     // to: "smdshakibmia2001@gmail.com",
     subject: "Initiation of Withdrawal Enquiry Process",
     // text: "Plaintext version of the message",

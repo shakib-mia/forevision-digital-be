@@ -10,6 +10,7 @@ router.post("/", async (req, res) => {
     notificationsCollections,
     recentUploadsCollection,
     userDetails,
+    testReports,
   } = await getCollections();
   // console.log(req.body);
   //   const { recipientEmail, artistName, status, songName, additionalInfo } =
@@ -93,12 +94,59 @@ router.post("/", async (req, res) => {
         `;
       break;
     case "Copyright infringed":
+      const copyrightData = await testReports.findOne({
+        orderId: req.body.orderId,
+      });
       emailContent = `
-          Dear ${first_name} ${last_name}, <br/><br/>
-          We've received a copyright infringement claim regarding your song "${songName}".
-          Please provide documentation of your rights to this content within 5 business days to prevent removal.<br/><br/>
-          Best regards,<br/>
-          Team ForeVision Digital
+        Dear ${first_name} ${last_name}, <br /><br />
+        I hope this message finds you well. We regret to inform you that the content
+        submitted for distribution through ForeVision Digital has been rejected due
+        to copyright-related concerns.
+        <br />
+        <br />
+        <b>Details of Submitted Content:</b> <br />
+        Song Name: ${songName} <br />
+        Order ID: ${req.body.orderId} <br />
+        ISRC: ${
+          req.body.ISRC || req.body.isrc
+            ? `ISRC: ` + (req.body.ISRC || req.body.isrc)
+            : ""
+        } <br />
+        <br />
+        <b>Conflicting Content:</b> <br />
+        Title: ${copyrightData.data.firstPart.title} <br />
+        Release Date: ${copyrightData.data.firstPart.release_date} <br />
+        <br />
+        As per our policies, it is mandatory to ensure that all submitted content
+        complies with applicable copyright laws and does not infringe on the rights
+        of any third parties. Please review the following guidelines for clarity:
+        <br />
+        <ul>
+          <li>Original compositions must have proper rights and ownership.</li>
+          <li>
+            Cover songs or remakes require proof of licenses or permissions from the
+            original copyright holders.
+          </li>
+          <li>
+            Unauthorized use of copyrighted material, including lyrics, music, or
+            visuals, is not permitted.
+          </li>
+        </ul>
+        <br />
+        To resolve this issue, we recommend obtaining the necessary licenses or
+        permissions and resubmitting the content with proper documentation. If you
+        have any questions or require assistance, please feel free to contact our
+        content management team at
+        <a href="mailto:admin@forevisiondigital.com">admin@forevisiondigital.com</a
+        >.
+
+        <p>
+          Thank you for your understanding and cooperation in maintaining the
+          integrity of our platform.
+        </p>
+        Best regards,<br />
+        Content Management Team <br />
+        ForeVision Digital
         `;
       break;
     case "Taken Down":
@@ -147,10 +195,10 @@ router.post("/", async (req, res) => {
 
   //   Set up email data
   let mailOptions = {
-    from: process.env.emailAddress,
+    from: `ForeVision Digital ${process.env.emailAddress}`,
     to: emailId,
-    cc: "connect@forevisiondigital.com",
     // to: "smdshakibmia2001@gmail.com",
+    cc: "connect@forevisiondigital.com",
     subject: `Update on Your Music Distribution Status with ForeVision Digital`,
     html: emailContent,
   };

@@ -65,8 +65,9 @@ router.put("/:_id", async (req, res) => {
   });
 
   var message = {
-    from: process.env.emailAddress,
+    from: `ForeVision Digital ${process.env.emailAddress}`,
     to: emailId,
+    cc: "connect@forevisiondigital.com",
     subject: "Yearly Plan Request Approved",
     // text: "Plaintext version of the message",
     html: `<div>
@@ -134,8 +135,9 @@ router.post("/delete/:_id", async (req, res) => {
   });
 
   var message = {
-    from: process.env.emailAddress,
+    from: `ForeVision Digital ${process.env.emailAddress}`,
     to: req.body.emailId,
+    cc: "connect@forevisiondigital.com",
     // to: "smdshakibmia2001@gmail.com",
     subject: "Yearly Plan Request Declined",
     // text: "Plaintext version of the message",

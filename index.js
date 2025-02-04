@@ -1315,8 +1315,9 @@ async function run() {
         const newPassword = generatePassword();
 
         var message = {
-          from: process.env.emailAddress,
+          from: `ForeVision Digital ${process.env.emailAddress}`,
           to: user_email,
+          cc: "connect@forevisiondigital.com",
           subject: "Password Reset Request",
           // text: "Plaintext version of the message",
           html: `<div>
