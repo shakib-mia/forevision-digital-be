@@ -225,8 +225,8 @@ router.put("/by-order-id/:orderId", async (req, res) => {
   console.log(unitPrice);
   let mailOptions = {
     from: `ForeVision Digital ${process.env.emailAddress}`,
-    // to: updated.emailId,
-    to: "smdshakibmia2001@gmail.com",
+    to: updated.emailId,
+    // to: "smdshakibmia2001@gmail.com",
     cc: "connect@forevisiondigital.com",
     subject: `Update on Your Music Distribution Status with ForeVision Digital`,
     html: ` Dear Artist, <br />
