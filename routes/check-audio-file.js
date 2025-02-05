@@ -152,6 +152,7 @@ const trimAndIdentify = async (filePath, startTime, duration) => {
         }
 
         const result = await acr.identify(finalAudioBuffer);
+        console.log(result);
         resolve(result);
       } catch (err) {
         reject(err);

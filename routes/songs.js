@@ -196,17 +196,24 @@ router.put("/by-order-id/:orderId", async (req, res) => {
   // const { recentUploadsCollection } = await getCollections();
   const { recentUploadsCollection, userDetails, notificationsCollections } =
     await getCollections();
-  const client = await userDetails.findOne({ user_email: req.body.emailId });
+  const client = await userDetails.findOne({
+    user_email: req.body.emailId || req.body.userEmail,
+  });
   const data = await recentUploadsCollection.findOne({ orderId });
   const updated = req.body;
-  updated.status = "paid";
+
+  if (updated.price !== 0) {
+    updated.status = "paid";
+  } else {
+    updated.status = "submitted";
+  }
 
   delete updated._id;
 
   const timeStamp = Math.floor(new Date().getTime() / 1000);
 
   const notification = {
-    email: req.body.emailId,
+    email: req.body.emailId || req.body.userEmail,
     message: `Congratulations! You Uploaded a Song Successfully!`,
     date: timeStamp,
   };
