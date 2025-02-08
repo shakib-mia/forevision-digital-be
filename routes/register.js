@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 router.post("/", async (req, res) => {
   const { adminsCollection } = await getCollections();
   // console.log(adminsCollection);
-  console.log(req.body);
+  //   console.log(req.body);
   const userExist = await adminsCollection.findOne({
     email: req.body.email,
   });

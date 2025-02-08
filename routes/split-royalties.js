@@ -57,7 +57,7 @@ router.put("/:_id", async (req, res) => {
       const notificationRequest = await notificationsCollections.insertOne(
         notification
       );
-      console.log(notificationRequest);
+      //   console.log(notificationRequest);
     }
 
     for (const split of splits) {
@@ -151,7 +151,7 @@ const sendEmail = async (to, subject, htmlContent) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`Email sent to ${to}`);
+    //   console.log(`Email sent to ${to}`);
   } catch (error) {
     console.error(`Error sending email to ${to}:`, error);
   }

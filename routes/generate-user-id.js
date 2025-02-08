@@ -39,7 +39,7 @@ router.get("/by-email-id/:user_email", async (req, res) => {
   // console.log(data2);
   const newData = { ...data2 };
   delete newData._id;
-  console.log(newData);
+  //   console.log(newData);
 
   const updateCursor = await clientsCollection.updateOne(
     { _id: data2._id },

@@ -34,7 +34,7 @@ const generateEmployeeCode = async () => {
 
   // Generate the new employee code with the correct format
   const newEmployeeCode = `FVDE${newCodeNumber.toString().padStart(5, "0")}`;
-  console.log(newEmployeeCode);
+  //   console.log(newEmployeeCode);
 
   return newEmployeeCode;
 };

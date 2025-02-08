@@ -13,7 +13,7 @@ router.post("/", verifyJWT, async (req, res) => {
 
   res.send(insertCursor);
 
-  //   console.log(body);
+  // //   console.log(body);
 });
 
 router.get("/", async (req, res) => {

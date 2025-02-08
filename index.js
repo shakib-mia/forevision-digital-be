@@ -1374,7 +1374,7 @@ async function run() {
           .limit(1) // Fetch only the first document
           .toArray();
 
-        console.log(result[0]);
+        // console.log(result[0]);
 
         res.send({ data: { ...data2, ...data, kycFilled: foundKyc !== null } });
       } else {

@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 
   filename: function (req, file, cb) {
     const { authorization } = req.headers;
-    console.log(req.headers);
+    //   console.log(req.headers);
     const { email } = jwt.decode(authorization);
 
     cb(
@@ -40,7 +40,7 @@ router.use(
 );
 
 router.post("/", upload.single("file"), async (req, res) => {
-  //   console.log(req.file);
+  // //   console.log(req.file);
   res.send({ url: `${req.protocol}://${req.get("host")}/${req.file?.path}` });
 });
 

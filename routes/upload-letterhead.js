@@ -47,7 +47,7 @@ router.post("/", upload.single("file"), (req, res) => {
 
   const filePath = path.join("/uploads/letterheads", req.file.filename);
 
-  console.log(req.file);
+  //   console.log(req.file);
   res.send({
     url: `${req.protocol}://${req.get("host")}${filePath}`,
   });

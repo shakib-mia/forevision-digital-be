@@ -23,7 +23,7 @@ router.get("/user", async (req, res) => {
 
   const code = await crbtCodes.find({ ISRC: { $in: isrcs } }).toArray();
 
-  console.log(code);
+  //   console.log(code);
 
   res.send(code);
 });

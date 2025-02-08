@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   const { uploadDate } = await getCollections();
   const latestDate = await uploadDate.findOne({});
-  console.log(latestDate);
+  //   console.log(latestDate);
 
   res.send(latestDate);
 });
@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
 router.put("/", async (req, res) => {
   const { uploadDate } = await getCollections();
   const latestDate = await uploadDate.findOne({});
-  //   console.log(latestDate);
+  // //   console.log(latestDate);
   const { _id } = latestDate;
   const updateCursor = await uploadDate.updateOne(
     { _id },

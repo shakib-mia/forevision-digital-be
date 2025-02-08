@@ -9,7 +9,7 @@ router.get("/", verifyJWT, async (req, res) => {
   const { recordLabelsCollection } = await getCollections();
 
   const { email } = jwt.decode(req.headers.token);
-  //   console.log(email);
+  // //   console.log(email);
 
   const recordLabels = await recordLabelsCollection
     .find({
@@ -79,7 +79,7 @@ router.put("/:_id", async (req, res) => {
 });
 
 router.post("/:_id", async (req, res) => {
-  console.log(req.params._id, req.body);
+  //   console.log(req.params._id, req.body);
   const { recordLabelsCollection, notificationsCollections } =
     await getCollections();
 

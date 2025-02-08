@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
   //   const { recipientEmail, artistName, status, songName, additionalInfo } =
   //     req.body;
   const { emailId, songName, status, reason } = req.body;
-  console.log(req.body);
+  //   console.log(req.body);
   const user = await clientsCollection.findOne({
     emailId: emailId,
   });
@@ -257,9 +257,9 @@ router.post("/", async (req, res) => {
     const { isrc, emailId } = req.body;
 
     const client = await clientsCollection.findOne({ emailId: emailId });
-    console.log(client);
+    //   console.log(client);
 
-    console.log(updateCursor);
+    //   console.log(updateCursor);
     res.send(updateCursor);
   }
 
@@ -298,7 +298,7 @@ router.post("/", async (req, res) => {
   }
 
   if (status === "Taken Down") {
-    console.log(req.body);
+    //   console.log(req.body);
     const updateCursor = await recentUploadsCollection.updateOne(
       {
         _id: new ObjectId(req.body._id),
@@ -315,7 +315,7 @@ router.post("/", async (req, res) => {
   }
 
   if (status === "Rejected") {
-    console.log(req.body);
+    //   console.log(req.body);
     const updateCursor = await recentUploadsCollection.updateOne(
       {
         _id: new ObjectId(req.body._id),

@@ -54,7 +54,7 @@ router.put("/:user_email", async (req, res) => {
     user_email: req.body.user_email,
   });
 
-  console.log(foundUser);
+  //   console.log(foundUser);
 
   res.send(updateCursor);
 });

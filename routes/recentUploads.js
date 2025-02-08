@@ -104,9 +104,9 @@ router.post("/", verifyJWT, async (req, res) => {
 
   req.body.emailId = email;
   console.clear();
-  console.log("uploading...", req.body);
+  //   console.log("uploading...", req.body);
   const recentUploads = await recentUploadsCollection.insertOne(req.body);
-  console.log(recentUploads);
+  //   console.log(recentUploads);
   res.send(recentUploads);
 });
 

@@ -9,12 +9,12 @@ router.get("/", async (req, res) => {
   const { token } = req.headers;
   const { clientsCollection } = await getCollections();
 
-  //   console.log(token);
+  // //   console.log(token);
   const { email } = jwt.decode(token);
 
-  //   console.log(email);
+  // //   console.log(email);
   const userData = await clientsCollection.findOne({ emailId: email });
-  console.log(userData);
+  //   console.log(userData);
 });
 
 module.exports = router;

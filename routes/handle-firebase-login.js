@@ -8,7 +8,7 @@ router.get("/:user_email", async (req, res) => {
   const { usersCollection, userDetails } = await getCollections();
   const { user_email } = req.params;
   const userData = await usersCollection.findOne({ user_email });
-  //   console.log(userData);
+  // //   console.log(userData);
 
   if (userData !== null) {
     const token = jwt.sign(

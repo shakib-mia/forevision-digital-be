@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
       : file.originalname;
 
     const { email } = jwt.decode(authorization);
-    //  console.log("file name", file);
+    ////   console.log("file name", file);
     cb(
       null,
       file.fieldname +
@@ -48,12 +48,12 @@ router.use(
 );
 
 router.post("/", upload.single("file"), (req, res) => {
-  //    console.log(req, "invoice");
+  //  //   console.log(req, "invoice");
   const fileName = req.file?.path?.includes(" ")
     ? req.file?.path?.split(" ").join("_")
     : req.file?.path;
 
-  console.log(req.file);
+  //   console.log(req.file);
 
   res.send({
     pdfUrl: `${req.protocol}://${req.get("host")}/${fileName}`,

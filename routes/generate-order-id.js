@@ -35,7 +35,7 @@ async function generateUniqueOrderId() {
     orderId = await getNextOrderId();
     orderExists = await recentUploadsCollection.findOne({ orderId });
     // if (orderExists) {
-    //   console.log(`Order ID ${orderId} already exists. Generating a new one.`);
+    // //   console.log(`Order ID ${orderId} already exists. Generating a new one.`);
     // }
   }
 

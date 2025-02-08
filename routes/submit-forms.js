@@ -79,7 +79,7 @@ router.post("/", async (req, res) => {
     // If you have additional custom handling for certain conditions, add it here
     // Example: Handle 'video-distribution' type fields
     // if (formData.id === "video-distribution") {
-    //   console.log(
+    // //   console.log(
     //     "Video Distribution Content Type:",
     //     formData.video_distribution_content_type
     //   );
@@ -87,7 +87,7 @@ router.post("/", async (req, res) => {
 
     const { id, ...dataToInsert } = formData;
 
-    console.log(id);
+    //   console.log(id);
     delete formData.id;
     // console.log(id, formData);
     const collection = await client2.db("forevision-digital").collection(id);
@@ -103,7 +103,7 @@ router.post("/", async (req, res) => {
 
 router.put("/:collection/:_id", async (req, res) => {
   const { collection, _id } = req.params;
-  console.log(collection, _id);
+  //   console.log(collection, _id);
   const { notificationsCollections } = await getCollections();
 
   delete req.body._id;

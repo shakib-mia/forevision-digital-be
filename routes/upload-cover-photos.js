@@ -36,7 +36,7 @@ const upload = multer({ storage: storage });
 router.use("/uploads/cover-photos", express.static("uploads/cover-photos"));
 
 router.post("/", upload.single("file"), async (req, res) => {
-  //   console.log(req.file);
+  // //   console.log(req.file);
   res.send({ url: `${req.protocol}://${req.get("host")}/${req.file?.path}` });
 });
 

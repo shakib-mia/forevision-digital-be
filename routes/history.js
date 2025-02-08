@@ -38,7 +38,7 @@ router.get("/calculate-disburse", async (req, res) => {
   // const clients = await clientsCollection.find({}).toArray();
 
   // for (const client of clients) {
-  //   console.log(client);
+  // //   console.log(client);
   // }
 
   // console.log(object);
@@ -58,7 +58,7 @@ router.get("/calculate-disburse", async (req, res) => {
       // res.send
       clients.push(client);
     } else {
-      console.log(item);
+      //   console.log(item);
     }
   }
 

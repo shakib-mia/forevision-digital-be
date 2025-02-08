@@ -7,7 +7,7 @@ const { getCollections } = require("../constants");
 // Your /users route logic
 router.get("/", async (req, res) => {
   const { clientsCollection } = await getCollections();
-  //   console.log(clientsCollection);
+  // //   console.log(clientsCollection);
   const usersCursor = await clientsCollection.find({});
   const users = await usersCursor.toArray();
 

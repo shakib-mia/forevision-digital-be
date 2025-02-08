@@ -71,7 +71,7 @@ router.post("/", verifyJWT, async (req, res) => {
       console.error(error);
       res.status(500).send(error);
     } else {
-      console.log("sent");
+      //   console.log("sent");
     }
   });
 
@@ -149,7 +149,7 @@ router.get("/", verifyJWT, async (req, res) => {
       console.error(error);
       res.status(500).send(error);
     } else {
-      console.log("sent");
+      //   console.log("sent");
     }
   });
 

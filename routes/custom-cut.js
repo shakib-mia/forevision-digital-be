@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
   //   if (found !== null) {
   const { _id } = found;
 
-  console.log(_id, req.body);
+  //   console.log(_id, req.body);
   const cursor = await cutPercentages.updateOne(
     { _id },
     { $set: req.body },
@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
   res.send(cursor);
   //   }
 
-  //   console.log(found);
+  // //   console.log(found);
 });
 
 router.get("/:isrc", async (req, res) => {

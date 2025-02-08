@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
     if (!found) {
       return res.status(401).json({ message: "User does not exist" });
     }
-    console.log(found.password, employeePassword);
+    //   console.log(found.password, employeePassword);
 
     // Check if the password matches
     if (found.password !== employeePassword) {

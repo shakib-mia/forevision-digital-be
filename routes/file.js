@@ -4,7 +4,7 @@ const path = require("path");
 
 router.get("/:filename", async (req, res) => {
   const { filename } = req.params;
-  //   console.log(
+  // //   console.log(
   //     __dirname
   //       .split("/")
   //       .slice(0, __dirname.split("/").length - 1)

@@ -79,7 +79,7 @@ router.get("/songs", async (req, res) => {
       { upsert: false }
     );
 
-    console.log(updateCursor, { ...newData });
+    // console.log(updateCursor, { ...newData });
   }
 
   res.send(songs);

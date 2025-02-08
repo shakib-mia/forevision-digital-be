@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
   const { clientsCollection, paymentHistory } = await getCollections();
 
   const users = await clientsCollection.find({}).toArray();
-  //   console.log(users);
+  // //   console.log(users);
   const disbrusedPayments = await paymentHistory.find({}).toArray();
 
   for (const user of users) {
@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
     user.lifetimeDisbursed = lifetimeDisbursed;
     // console.log(newUser);
     // if (newUser.lifetimeDisbursed) {
-    //   console.log(newUser);
+    // //   console.log(newUser);
     // }
     // console.log(await clientsCollection.findOne({ emailId: newUser.emailId }));
     // console.log(newUser);

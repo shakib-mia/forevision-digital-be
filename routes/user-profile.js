@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 router.get("/", verifyJWT, async (req, res) => {
   const { userProfileCollection } = await getCollections();
   const { email } = jwt.decode(req.headers.token);
-  //   console.log(clientsCollection);
+  // //   console.log(clientsCollection);
   const usersCursor = await userProfileCollection.find({ user_email: email });
   const users = await usersCursor.toArray();
 

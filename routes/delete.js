@@ -30,7 +30,7 @@ router.get("/:uploadDate", async (req, res) => {
     },
   ];
   const found = await revenueCollections.aggregate(pipeline).toArray();
-  //   console.log(pipeline);
+  // //   console.log(pipeline);
   const types = [];
   for (const item of found) {
     if (typeof item["final revenue"] !== "number") {

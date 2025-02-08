@@ -61,7 +61,7 @@ router.put("/update-upload-list/:_id", verifyJWT, async (req, res) => {
     { $set: req.body },
     { upsert: false }
   );
-  console.log(req.body);
+  //   console.log(req.body);
   const insertCursor = await newSongs.insertOne(req.body);
 
   res.send({ updateCursor, insertCursor });
@@ -229,7 +229,7 @@ router.put("/by-order-id/:orderId", async (req, res) => {
   const subTotal = unitPrice / (1 + 18 / 100);
   const gstAmount = unitPrice - subTotal;
 
-  console.log(unitPrice);
+  //   console.log(unitPrice);
   let mailOptions = {
     from: `ForeVision Digital ${process.env.emailAddress}`,
     to: updated.emailId,
@@ -287,7 +287,7 @@ router.put("/by-order-id/:orderId", async (req, res) => {
     },
   });
 
-  console.log("sending mail...");
+  //   console.log("sending mail...");
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
@@ -331,7 +331,7 @@ router.get("/:_id", async (req, res) => {
       res.status(404).send({ message: "Song not found" });
     }
 
-    console.log(song);
+    //   console.log(song);
   } catch (error) {
     // Log the error and send a 500 status in case of a server error
     console.error("Error finding song:", error);

@@ -24,10 +24,10 @@ router.post("/", verifyJWT, async (req, res) => {
   const request = { ...req.body };
   delete request._id;
 
-  //   console.log(request);
+  // //   console.log(request);
   request.requested = true;
 
-  //   console.log(req.body._id);
+  // //   console.log(req.body._id);
 
   const updateCursor = await recentUploadsCollection.updateOne(
     { _id: new ObjectId(req.body._id) },
@@ -90,7 +90,7 @@ router.post("/:payment_id", async (req, res) => {
       res.send({ ...paymentItem, ...updateCursor, refundUpdateCursor });
     }
   } catch (error) {
-    console.log(error);
+    //   console.log(error);
     res.status(500).json({
       message: "Refund initiation failed",
       error: error.error.description,

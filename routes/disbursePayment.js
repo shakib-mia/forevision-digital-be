@@ -103,7 +103,7 @@ router.put("/:_id", async (req, res) => {
     </div>`,
   };
 
-  console.log(message);
+  //   console.log(message);
 
   transporter.sendMail(message, async (error, info) => {
     if (error) {

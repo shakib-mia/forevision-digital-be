@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
 
     instance.orders.create(options, (error, order) => {
       if (error) {
-        console.log(error);
+        //   console.log(error);
         return res.status(500).json({ message: "Payment Request Failed" });
       }
       console.clear();
@@ -47,7 +47,7 @@ router.post("/", async (req, res) => {
       res.send(order);
     });
   } catch (error) {
-    console.log(error);
+    //   console.log(error);
   }
 });
 
@@ -181,7 +181,7 @@ router.post("/verify/yearly", verifyJWT, async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    //   console.log(error);
   }
 });
 
@@ -242,7 +242,7 @@ router.post("/verify", verifyJWT, async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    //   console.log(error);
   }
 });
 
