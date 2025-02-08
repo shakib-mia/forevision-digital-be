@@ -57,7 +57,7 @@ router.post("/verify/yearly", verifyJWT, async (req, res) => {
 
   const { email } = jwt.decode(req.headers.token);
 
-  const yearlyPlanStartDate = getCurrentYearDateFormatted("1/1/2000");
+  const yearlyPlanStartDate = getCurrentYearDateFormatted();
   const yearlyPlanEndDate = getNextYearDate(yearlyPlanStartDate);
   const client = await userDetails.findOne({ user_email: email });
   client.yearlyPlanStartDate = yearlyPlanStartDate;

@@ -31,7 +31,7 @@ const cleanupTempFile = async (filePath) => {
     if (filePath) {
       await fs.access(filePath); // Check if file exists
       await fs.unlink(filePath); // Delete the file
-      console.log(`Temporary file ${filePath} deleted successfully.`);
+      // console.log(`Temporary file ${filePath} deleted successfully.`);
     }
   } catch (error) {
     console.error(`Error cleaning up file ${filePath}:`, error);
@@ -72,20 +72,23 @@ const getAudioDuration = (filePath) => {
   });
 };
 
-// Function to calculate timestamps based on duration
 const calculateTimestamps = (duration) => {
+  const startTime = 0;
+  const middleTime = duration * 0.4;
+  const endTime = duration * 0.8;
+
   return {
     start: {
-      time: "00:00:00",
-      duration: "00:00:20",
+      time: formatTime(startTime),
+      duration: formatTime(middleTime - startTime), // 40% of total duration
     },
     middle: {
-      time: formatTime(duration * 0.4), // 40% into the song
-      duration: "00:00:20",
+      time: formatTime(middleTime),
+      duration: formatTime(endTime - middleTime), // 40% to 80% of total duration
     },
     end: {
-      time: formatTime(Math.max(0, duration * 0.8)), // 80% into the song
-      duration: "00:00:20",
+      time: formatTime(endTime),
+      duration: formatTime(duration - endTime), // 80% to end of song
     },
   };
 };
@@ -152,7 +155,7 @@ const trimAndIdentify = async (filePath, startTime, duration) => {
         }
 
         const result = await acr.identify(finalAudioBuffer);
-        console.log(result);
+        // console.log(result);
         resolve(result);
       } catch (err) {
         reject(err);
@@ -171,7 +174,7 @@ const formatResult = (result, partName) => {
     return { error: result.error };
   }
 
-  console.log(result);
+  // console.log(result);
 
   // Check for both `music` and `humming` metadata
   const metadata = result.metadata;
@@ -239,7 +242,7 @@ const fetchSongByAcrid = async (acrid) => {
       }
     );
 
-    console.log("Song Metadata:", response.data);
+    // console.log("Song Metadata:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching song:", error);
