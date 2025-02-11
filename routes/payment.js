@@ -6,10 +6,8 @@ const { getCollections } = require("../constants");
 const jwt = require("jsonwebtoken");
 const verifyJWT = require("../verifyJWT");
 const { ObjectId } = require("mongodb");
-const { default: getNextYearDate } = require("../utils/getNextYearDate");
-const {
-  default: getCurrentYearDateFormatted,
-} = require("../utils/getCurrentYearDateFormatted");
+const getNextYearDate = require("../utils/getNextYearDate");
+const getCurrentYearDateFormatted = require("../utils/getCurrentYearDateFormatted");
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
@@ -22,7 +20,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-router.post("/", async (req, res) => {
+router.post("/", verifyJWT, async (req, res) => {
   try {
     const instance = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
@@ -42,7 +40,7 @@ router.post("/", async (req, res) => {
         //   console.log(error);
         return res.status(500).json({ message: "Payment Request Failed" });
       }
-      console.clear();
+      // console.clear();
       // console.log(order);
       res.send(order);
     });
@@ -82,6 +80,7 @@ router.post("/verify/yearly", verifyJWT, async (req, res) => {
       client.razorpay_order_id = razorpay_order_id;
       client.razorpay_payment_id = razorpay_payment_id;
       const { _id, ...rest } = client;
+
       const updateCursor = await userDetails.updateOne(
         { _id: new ObjectId(_id) },
         { $set: rest },
@@ -91,11 +90,12 @@ router.post("/verify/yearly", verifyJWT, async (req, res) => {
       var message = {
         from: `ForeVision Digital ${process.env.emailAddress}`,
         to: client.user_email,
+        // to: "smdshakibmia2001@gmail.com",
         cc: "connect@forevisiondigital.com",
-        subject: "Password Reset Request",
+        subject: "Your ForeVision Digital Yearly Plan is Activated!",
         // text: "Plaintext version of the message",
         html: `<div style="max-width: 500px; margin: 0 auto">
-        Dear [User’s Name], <br />
+        Dear ${client.first_name} ${client.last_name}, <br />
         <br />
         <p>
           Thank you for upgrading to our Yearly Plan! Your subscription has been
@@ -106,10 +106,14 @@ router.post("/verify/yearly", verifyJWT, async (req, res) => {
         <h4>Purchase Details</h4>
         <ul>
           <li>Plan: ForeVision Yearly Plan</li>
-          <li>Amount Paid: [₹XXX / $XXX]</li>
-          <li>Transaction ID: [XXXXXXXXXX]</li>
-          <li>Purchase Date: [DD/MM/YYYY]</li>
-          <li>Expiry Date: [DD/MM/YYYY]</li>
+          <li>Amount Paid: ${
+            userDetails.billing_country === "India"
+              ? `₹${price / 100}`
+              : `$${price / 100}`
+          }</li>
+          <li>Transaction ID: ${razorpay_payment_id}</li>
+          <li>Purchase Date: ${yearlyPlanStartDate}</li>
+          <li>Expiry Date: ${yearlyPlanEndDate}</li>
         </ul>
   
         <h4>What’s Next?</h4>
@@ -133,36 +137,16 @@ router.post("/verify/yearly", verifyJWT, async (req, res) => {
           any questions or need assistance, feel free to reach out.
         </p>
         <h4>Need Help?</h4>
-        <p>Contact our support team at [Support Email] or visit [Website URL].</p>
+        <p>Contact our support team at <a href='mailto:support@forevisiondigital.com'>Support</a> or visit <a href='https://forevisiondigital.com/'>Our Support</a>.</p>
         <p>Happy Distributing!</p>
   
         <p>
           Best regards, <br />
           ForeVision Digital <br />
-          [Website URL] | [Support Email] <br />
+          <a href='https://forevisiondigital.com/'>Our Support</a> | <a href='mailto:support@forevisiondigital.com'>Support</a> <br />
         </p>
       </div>`,
       };
-
-      // transporter.sendMail(message, async (error, info) => {
-      //   if (error) {
-      //     console.error(error);
-      //     res.status(500).send({ message: "Error Sending Mail" });
-      //   } else {
-      //     bcrypt.hash(newPassword, 10, async function (err, hash) {
-      //       // Store hash in your password DB.
-      //       if (hash.length) {
-      //         const updateCursor = await usersCollection.updateOne(
-      //           { user_email },
-      //           { $set: { ...usersCursor, user_password: hash } },
-      //           { upsert: false }
-      //         );
-      //         res.send(updateCursor);
-      //         // res.status(200).send("message sent successfully");
-      //       }
-      //     });
-      //   }
-      // });
 
       const data = {
         razorpay_order_id,
@@ -173,15 +157,22 @@ router.post("/verify/yearly", verifyJWT, async (req, res) => {
         ...req.body,
       };
 
-      return res.send({
-        message: "Payment verified successfully",
-        razorpay_order_id,
-        razorpay_payment_id,
-        updateCursor,
+      transporter.sendMail(message, async (error, info) => {
+        if (error) {
+          console.error(error);
+          res.status(500).send({ message: "Error Sending Mail" });
+        } else {
+          res.send({
+            message: "Payment verified successfully",
+            razorpay_order_id,
+            razorpay_payment_id,
+            updateCursor,
+          });
+        }
       });
     }
   } catch (error) {
-    //   console.log(error);
+    console.log(error);
   }
 });
 

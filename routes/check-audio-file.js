@@ -119,7 +119,7 @@ const trimAndIdentify = async (filePath, startTime, duration) => {
       "-t",
       duration,
       "-f",
-      "mp3",
+      "wav",
       "-acodec",
       "libmp3lame",
       "-ar",
@@ -215,6 +215,8 @@ const fetchSongByAcrid = async (acrid) => {
     signatureVersion,
     timestamp,
   ].join("\n");
+
+  console.log({ stringToSign });
 
   // Generate the signature
   const signature = crypto
@@ -347,6 +349,130 @@ router.post("/:orderId", async (req, res) => {
     };
 
     await testReports.insertOne(dbBody);
+
+    res.status(200).json({
+      success: true,
+      message: "Data processed successfully.",
+      data: testReport,
+    });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to process audio file",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  } finally {
+    // Clean up temporary file after processing
+    if (tempFilePath) {
+      await cleanupTempFile(tempFilePath);
+    }
+  }
+});
+
+router.get("/:orderId/:songIdx", async (req, res) => {
+  const { testReports, recentUploadsCollection } = await getCollections();
+  let tempFilePath = null;
+
+  try {
+    const { orderId, songIdx } = req.params;
+    const album = await recentUploadsCollection.findOne({ orderId });
+
+    if (!album) {
+      return res.status(404).json({ error: "Album not found." });
+    }
+
+    if (!album.songs || !album.songs[parseInt(songIdx)]) {
+      return res.status(400).json({ error: "Invalid song index." });
+    }
+
+    const { songUrl } = album.songs[parseInt(songIdx)];
+
+    if (!songUrl || !isValidUrl(songUrl)) {
+      return res.status(400).json({ error: "Valid song URL is required." });
+    }
+
+    // Check if the test report exists for this orderId and songIdx
+    const existingReport = await testReports.findOne({
+      orderId,
+      songIdx: parseInt(songIdx),
+    });
+
+    if (existingReport) {
+      return res.status(200).json({
+        success: true,
+        message: "Data fetched from the database.",
+        data: existingReport,
+      });
+    }
+
+    // Download the audio file
+    const response = await axios.get(songUrl, {
+      responseType: "arraybuffer",
+      timeout: 30000,
+      maxContentLength: 1000 * 1024 * 1024,
+    });
+
+    // Save the audio file temporarily
+    tempFilePath = path.join(__dirname, `temp_${Date.now()}.mp3`);
+    await fs.writeFile(tempFilePath, Buffer.from(response.data));
+
+    // Get audio duration
+    const duration = await getAudioDuration(tempFilePath);
+    const timestamps = calculateTimestamps(duration);
+
+    // Process the three parts
+    const [firstPart, middlePart, lastPart] = await Promise.all([
+      trimAndIdentify(
+        tempFilePath,
+        timestamps.start.time,
+        timestamps.start.duration
+      ),
+      trimAndIdentify(
+        tempFilePath,
+        timestamps.middle.time,
+        timestamps.middle.duration
+      ),
+      trimAndIdentify(
+        tempFilePath,
+        timestamps.end.time,
+        timestamps.end.duration
+      ),
+    ]);
+
+    // Format results
+    const formattedResults = {
+      firstPart: formatResult(firstPart, "First part (0%)"),
+      middlePart: formatResult(middlePart, "Middle part (40%)"),
+      lastPart: formatResult(lastPart, "Last part (80%)"),
+    };
+
+    // Fetch song metadata by ACRCloud ID (example using first part's ACRCloud result)
+    const acrid = formattedResults.firstPart.acrid;
+    let songMetadata = null;
+
+    if (acrid) {
+      try {
+        songMetadata = await fetchSongByAcrid(acrid);
+      } catch (fetchError) {
+        console.error("Error fetching song metadata:", fetchError.message);
+      }
+    }
+
+    // Prepare the test report
+    const testReport = {
+      success: true,
+      duration,
+      timestamps,
+      data: formattedResults,
+      songMetadata,
+      orderId,
+      songIdx: parseInt(songIdx),
+    };
+
+    // Save test report to the database
+    await testReports.insertOne(testReport);
 
     res.status(200).json({
       success: true,

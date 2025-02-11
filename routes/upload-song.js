@@ -28,6 +28,7 @@ const storage = multer.diskStorage({
     const fileName = file.originalname?.includes(" ")
       ? file.originalname?.split(" ").join("_")
       : file.originalname;
+    console.log(file.originalname);
 
     const { email } = jwt.decode(token);
     cb(
