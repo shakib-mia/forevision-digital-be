@@ -27,13 +27,13 @@ router.get("/", verifyJWT, async (req, res) => {
 
 router.get("/album", verifyJWT, async (req, res) => {
   const { recentUploadsCollection } = await getCollections();
-  // const album =await recentUploadsCollection.find({price: 99900, })
+  // const album =await recentUploadsCollection.find({price: 249900, })
   const { email } = jwt.decode(req.headers.token);
 
   // console.log(email);
   const album = await recentUploadsCollection
     .find({
-      price: 99900,
+      price: 249900,
       userEmail: email,
     })
     .toArray();
@@ -42,12 +42,12 @@ router.get("/album", verifyJWT, async (req, res) => {
 
 router.get("/album/:_id", verifyJWT, async (req, res) => {
   const { recentUploadsCollection } = await getCollections();
-  // const album =await recentUploadsCollection.find({price: 99900, })
+  // const album =await recentUploadsCollection.find({price: 249900, })
   const { email } = jwt.decode(req.headers.token);
 
   // console.log(email);
   const album = await recentUploadsCollection.findOne({
-    price: 99900,
+    price: 249900,
     userEmail: email,
     _id: new ObjectId(req.params._id),
   });
@@ -61,7 +61,7 @@ router.get("/admin/album/live", verifyJWT, async (req, res) => {
   // Fetch the album where all songs have the "streaming" status
   const album = await recentUploadsCollection
     .find({
-      price: 99900,
+      price: 249900,
       songs: {
         $not: { $elemMatch: { status: { $ne: "streaming" } } }, // No song with a non-"streaming" status
       },
@@ -85,7 +85,7 @@ router.get("/admin/album", async (req, res) => {
   // Fetch all albums based on price and user email
   const albums = await recentUploadsCollection
     .find({
-      price: 99900,
+      price: 249900,
       // userEmail: email,
     })
     .toArray();

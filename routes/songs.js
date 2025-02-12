@@ -340,25 +340,54 @@ router.get("/:_id", async (req, res) => {
 });
 
 router.get("/by-isrc/:ISRC", async (req, res) => {
-  const { ISRC } = req.params;
-  const { songs, recentUploadsCollection } = await getCollections();
+  try {
+    const { ISRC } = req.params;
+    const { songs, recentUploadsCollection, clientsCollection } =
+      await getCollections();
 
-  // const song = await songs.findOne({ ISRC });
-
-  // Case insensitive
-  const song = await songs.findOne({
-    ISRC: { $regex: `^${ISRC}$`, $options: "i" },
-  });
-  // console.log(song);
-  // console.log(song);
-  if (song === null) {
-    const song2 = await recentUploadsCollection.findOne({
-      isrc: ISRC,
+    // Step 1: Search for the song in the songs collection
+    const song = await songs.findOne({
+      ISRC: { $regex: `^${ISRC}$`, $options: "i" },
     });
-    // console.log(song2);
-    res.send(song2);
-  } else {
-    res.send(song);
+
+    if (song === null) {
+      // Step 2: If song is not found in songs collection, search in recentUploadsCollection
+      const song2 = await recentUploadsCollection.findOne({
+        isrc: ISRC,
+      });
+
+      if (song2) {
+        // Find the client associated with this ISRC
+        const client = await clientsCollection.findOne({
+          isrc: { $regex: `(^|,)${ISRC}($|,)`, $options: "i" },
+        });
+
+        if (client) {
+          song2.emailId = client.emailId;
+        }
+
+        return res.send(song2);
+      }
+    } else {
+      // Step 3: Find the client associated with this ISRC
+      const client = await clientsCollection.findOne({
+        isrc: { $regex: `(^|,)${ISRC}($|,)`, $options: "i" },
+      });
+
+      if (client) {
+        song.emailId = client.emailId;
+      }
+
+      return res.send(song);
+    }
+
+    // If song or recent upload is not found, return a 404
+    return res.status(404).send({ error: "No song found for this ISRC" });
+  } catch (error) {
+    console.error("Error processing the request:", error);
+    return res
+      .status(500)
+      .send({ error: "An error occurred while processing the request" });
   }
 });
 

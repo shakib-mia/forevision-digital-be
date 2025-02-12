@@ -39,12 +39,13 @@ router.get("/", verifyJWT, async (req, res) => {
 
 router.get("/:isrc", async (req, res) => {
   try {
-    const { revenueCollections, splitRoyalties } = await getCollections();
+    const { revenueCollections, splitRoyalties, customCuts } =
+      await getCollections();
 
     const isrc = req.params.isrc;
     const { email } = jwt.decode(req.headers.token);
 
-    // Step 1: Pre-fetch data in batches for all related documents
+    // Step 1: Fetch revenue data
     const pipeline = [
       { $match: { isrc } },
       {
@@ -72,7 +73,7 @@ router.get("/:isrc", async (req, res) => {
 
     const isrcList = revenues.map((item) => item.isrc);
 
-    // Step 2: Fetch splits in batches
+    // Step 2: Fetch split royalties
     const splitRoyaltiesData = await splitRoyalties
       .find({ isrc: { $in: isrcList }, confirmed: true })
       .toArray();
@@ -81,13 +82,20 @@ router.get("/:isrc", async (req, res) => {
       splitRoyaltiesData.map((item) => [item.isrc, item.splits])
     );
 
-    // Step 3: Process the revenues and calculate fields
+    // Step 3: Fetch custom cut data (Check if ISRC exists in any customCuts entry)
+    const cutEntry = await customCuts.findOne({
+      ISRC: { $regex: `(^|,)${isrc}($|,)`, $options: "i" }, // Match ISRC in comma-separated list
+    });
+
+    console.log({ cutEntry });
+
+    const cutPercentage = cutEntry ? cutEntry.cut : 0; // Default 0 if no cut
+
+    // Step 4: Process revenues
     const updatedArray = revenues.map((item) => {
       const splits = splitRoyaltiesMap.get(item.isrc);
 
-      const result = {
-        ...item,
-      };
+      const result = { ...item };
 
       if (splits) {
         const userSplit = splits.find(
@@ -99,6 +107,13 @@ router.get("/:isrc", async (req, res) => {
             item["after tds revenue"] *
             (parseFloat(userSplit.percentage) / 100);
         }
+      }
+
+      console.log({ isrc, cutPercentage });
+      // Apply custom cut if applicable
+      if (cutPercentage > 0) {
+        result["final revenue"] =
+          item["after tds revenue"] * (1 - cutPercentage);
       }
 
       if (item.uploadDate) {

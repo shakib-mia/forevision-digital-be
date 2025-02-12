@@ -104,17 +104,25 @@ router.get("/", verifyJWT, async (req, res) => {
   const data = await kycCollection.findOne({ emailId: email });
 
   // console.log(req.body);
-  delete req.body._id;
+  // delete req.body._id;
   const userData = await userDetails.findOne({ user_email: email });
-  // console.log(userData);
   delete userData._id;
+  // console.log(userData);
+  const totalAmount = (
+    userData.lifetimeRevenue?.toFixed(2) -
+    (userData.lifetimeDisbursed?.toFixed(2) || 0)
+  ).toFixed(2);
+  // console.log(totalAmount);
 
   const postCursor = await withdrawalRequest.insertOne({
-    ...req.body,
     ...userData,
+    totalAmount,
   });
 
-  // console.log(userData);
+  console.log({
+    ...userData,
+    totalAmount,
+  });
 
   // const name = userData.first_name ?  `${userData.first_name} ${userData.last_name}`
 

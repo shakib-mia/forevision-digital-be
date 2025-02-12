@@ -2,12 +2,22 @@ const express = require("express");
 const router = express.Router();
 const { getCollections } = require("../constants");
 const verifyJWT = require("../verifyJWT");
+const { ObjectId } = require("mongodb");
 
 router.get("/", verifyJWT, async (req, res) => {
   const { platformsCollection } = await getCollections();
   const platformsCursor = await platformsCollection.find({});
   const platforms = await platformsCursor.toArray();
 
+  res.send(platforms.filter((item) => item.platformType !== "Unknown"));
+});
+
+router.get("/admin", async (req, res) => {
+  const { platformsCollection } = await getCollections();
+  const platformsCursor = await platformsCollection.find({});
+  const platforms = await platformsCursor.toArray();
+
+  console.log(platforms);
   res.send(platforms);
 });
 

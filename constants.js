@@ -105,6 +105,9 @@ const getCollections = async () => {
   const cutPercentages = await client
     .db("forevision-digital")
     .collection("cut-percentages");
+  const customCuts = await client2
+    .db("forevision-digital")
+    .collection("custom-cut");
 
   const songUpdateRequestCollection = await client2
     .db("forevision-digital")
@@ -233,6 +236,7 @@ const getCollections = async () => {
     splitRoyalties,
     uploadDate,
     testReports,
+    customCuts,
   };
 };
 
